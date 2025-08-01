@@ -1,0 +1,46 @@
+{
+    "global_config": {
+        "server_port": 5000,
+        "headless": true,
+        "base_refresh_interval": 300,
+        "base_output_folder": "ads_output"
+    },
+    "ad_units": [
+        {
+            "id": "example-unit-1",
+            "name": "Restaurant Ad Unit",
+            "ad_unit_path": "/6355419/Travel/Europe/France/Paris",
+            "ad_unit_size": [300, 250],
+            "refresh_interval": 300,
+            "output_folder": "ads_output/restaurant_ads",
+            "custom_targeting": {
+                "location": "warsaw",
+                "venue_type": "restaurant",
+                "audience": "premium"
+            },
+            "last_ad_info": {
+                "timestamp": null,
+                "filename": null,
+                "path": null
+            }
+        },
+        {
+            "id": "example-unit-2",
+            "name": "Retail Ad Unit",
+            "ad_unit_path": "/6355419/Commerce/Retail",
+            "ad_unit_size": [728, 90],
+            "refresh_interval": 180,
+            "output_folder": "ads_output/retail_ads",
+            "custom_targeting": {
+                "location": "krakow",
+                "venue_type": "retail",
+                "time_of_day": "evening"
+            },
+            "last_ad_info": {
+                "timestamp": null,
+                "filename": null,
+                "path": null
+            }
+        }
+    ]
+}
