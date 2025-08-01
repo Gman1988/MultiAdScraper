@@ -1,306 +1,481 @@
-# MultiAdScraper - Google Ad Manager Ad Capture System
+# 🎯 MultiAdScraper
 
-A comprehensive system for capturing ads from Google Ad Manager and distributing them to digital displays in venues.
+**Professional Google Ad Manager ad capture system for digital signage and content management.**
 
-## Features
+Automatically capture ads from Google Ad Manager and distribute them to digital displays in restaurants, retail stores, and other venues.
 
-- Multiple Ad Unit support with individual configurations
-- Custom targeting parameters for precise ad selection
-- **Dual format support**: JPEG images and MP4 videos
-- Automated ad capture at configurable intervals
-- Manual refresh capabilities
-- Web-based administration interface
-- Docker support for easy deployment
-- Integration-ready output for CMS systems
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
+[![Python](https://img.shields.io/badge/Python-3.11+-green)](https://python.org)
+[![License](https://img.shields.io/badge/License-Commercial-orange)](LICENSE)
 
-## Quick Start with Docker
+## 🚀 Quick Start
 
-### Prerequisites
-
-- Docker and Docker Compose installed
-- At least 2GB RAM available
-- Internet connection for downloading dependencies
-
-### 1. Clone/Download Files
-
-Create a new directory and save these files:
-
-```
-multi-ad-scraper/
-├── multi_ad_scraper.py
-├── requirements.txt
-├── Dockerfile
-├── docker-compose.yml
-├── config.json
-├── templates/
-│   └── index.html
-└── README.md
-```
-
-### 2. Run with Docker Compose
+### **One-Command Deployment**
 
 ```bash
-# Build and start the container
-docker-compose up -d
+# Clone and run (requires Docker Desktop)
+git clone https://github.com/Gman1988/MultiAdScraper.git
+cd MultiAdScraper
+docker-compose up --build -d
 
-# View logs
-docker-compose logs -f
-
-# Stop the system
-docker-compose down
+# Access: http://localhost:5000
 ```
 
-### 3. Access the Web Interface
+### **Windows One-Click Setup**
 
-Open your browser and go to: `http://localhost:5000`
+```powershell
+# Download and run automatic installer
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Gman1988/MultiAdScraper/main/deploy.ps1" -OutFile "deploy.ps1"
+powershell -ExecutionPolicy Bypass -File deploy.ps1
+```
 
-## Manual Installation (Without Docker)
+## ✨ Features
 
-### Prerequisites
+- 🎬 **Dual Format Support**: Automatic JPEG image and MP4 video capture
+- 🎯 **Custom Targeting**: Key-value targeting for precise ad selection
+- 🔄 **Multi-Unit Management**: Support for unlimited ad units with individual configurations
+- ⏰ **Flexible Scheduling**: Configurable refresh intervals per ad unit
+- 🌐 **Web Interface**: Full-featured admin panel for management
+- 📁 **Organized Output**: Dedicated folders per ad unit for easy CMS integration
+- 🐳 **Docker Ready**: Containerized deployment for any environment
+- 🔧 **API Integration**: REST endpoints for external system integration
+- 📊 **Real-time Monitoring**: Live preview and status monitoring
+- 🎨 **Professional UI**: Modern, responsive web interface
 
-- Python 3.11+
-- pip
-- At least 2GB RAM
+## 📋 Requirements
 
-### 1. Install Dependencies
+### **System Requirements**
+- **OS**: Windows 10/11, macOS, Linux
+- **RAM**: 4GB minimum, 8GB recommended
+- **Storage**: 5GB available space
+- **Network**: Stable internet connection
+
+### **Software Requirements**
+- **Docker Desktop** (recommended) OR Python 3.11+
+- **Modern web browser**
+- **Google Ad Manager account** (free)
+
+## 🔧 Installation
+
+### **Method 1: Docker (Recommended)**
+
+**Prerequisites:**
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+2. Ensure Docker is running (whale icon in system tray)
+
+**Installation:**
+```bash
+# Clone repository
+git clone https://github.com/Gman1988/MultiAdScraper.git
+cd MultiAdScraper
+
+# Start system
+docker-compose up --build -d
+
+# Verify installation
+docker-compose ps
+```
+
+**Access**: http://localhost:5000
+
+### **Method 2: Local Python Installation**
 
 ```bash
-# Install Python dependencies
+# Clone repository
+git clone https://github.com/Gman1988/MultiAdScraper.git
+cd MultiAdScraper
+
+# Install dependencies
 pip install -r requirements.txt
-
-# Install Playwright browsers
 playwright install chromium
-playwright install-deps chromium
-```
 
-### 2. Create Directory Structure
+# Create directories
+mkdir -p ads_output logs templates
 
-```bash
-mkdir -p templates
-mkdir -p ads_output
-mkdir -p logs
-```
-
-### 3. Run the Application
-
-```bash
+# Run application
 python multi_ad_scraper.py
 ```
 
-## Supported Ad Formats
+### **Method 3: Windows Automatic Setup**
 
-The system automatically detects and handles two types of ads:
+Download and run the automatic installer:
+- [deploy.ps1](deploy.ps1) - PowerShell automatic installer
+- [deploy.bat](deploy.bat) - Command Prompt installer
 
-### 📸 **Image Ads (JPEG)**
-- Banner ads, display ads, static images
-- Automatically converted to high-quality JPEG format
+## 🎯 Google Ad Manager Setup
+
+### **1. Create Free Account**
+1. Go to [Google Ad Manager](https://admanager.google.com)
+2. Sign in with any Google account (free)
+3. Create new network (e.g., "Your Business Name")
+4. Choose your country and currency
+
+### **2. Create Ad Units**
+1. Navigate to **Inventory** → **Ad units**
+2. Click **New ad unit**
+3. Configure:
+   - **Name**: Descriptive name (e.g., "Restaurant Display 1")
+   - **Size**: Match your display dimensions (e.g., 1920x1080)
+   - **Ad unit type**: Display
+4. Copy the **ad unit path** (e.g., `/123456789/restaurant_display`)
+
+### **3. Add to MultiAdScraper**
+1. Open http://localhost:5000
+2. Click **"Add New Ad Unit"**
+3. Enter your ad unit details:
+   - **Name**: Friendly name for identification
+   - **Ad Unit Path**: Path from Google Ad Manager
+   - **Size**: Width x Height in pixels
+   - **Refresh Interval**: How often to capture (seconds)
+   - **Output Folder**: Subfolder name for captured ads
+   - **Custom Targeting**: Key-value pairs for ad targeting
+
+## 🎨 Web Interface Guide
+
+### **Dashboard Overview**
+- **Ad Units Tab**: Manage all your ad units
+- **Global Configuration**: System-wide settings
+- **Real-time Preview**: See captured ads instantly
+- **Manual Controls**: Force refresh any ad unit
+
+### **Adding Ad Units**
+1. Click **"Add New Ad Unit"**
+2. Fill in configuration:
+   ```
+   Name: Restaurant Main Display
+   Ad Unit Path: /123456789/restaurant/main
+   Size: 1920 x 1080
+   Refresh Interval: 300 (5 minutes)
+   Output Folder: restaurant_main
+   ```
+3. Add **Custom Targeting** (optional):
+   ```
+   location: warsaw
+   venue_type: restaurant
+   time_of_day: dinner
+   audience: premium
+   ```
+4. Click **Save**
+
+### **Managing Ad Units**
+- **🔄 Refresh**: Manual ad capture
+- **✏️ Edit**: Modify configuration
+- **🗑️ Delete**: Remove ad unit
+- **👁️ Preview**: View latest captured ad
+
+## 📁 File Structure
+
+```
+MultiAdScraper/
+├── 🐍 multi_ad_scraper.py      # Main application
+├── 🌐 templates/
+│   └── index.html              # Web interface
+├── 📋 requirements.txt         # Python dependencies
+├── 🐳 Dockerfile              # Container configuration
+├── 🐳 docker-compose.yml       # Service orchestration
+├── ⚙️ config.json             # System configuration (auto-created)
+├── 📂 ads_output/             # Captured ads (auto-created)
+│   ├── restaurant_main/
+│   │   ├── ad_unit1_20241220_143022.jpg
+│   │   ├── ad_unit1_20241220_143322.mp4
+│   │   └── ad_unit1_20241220_143622.jpg
+│   └── retail_display/
+│       ├── ad_unit2_20241220_143025.mp4
+│       └── ad_unit2_20241220_143325.jpg
+└── 📜 logs/                   # System logs (auto-created)
+    └── ad_scraper.log
+```
+
+## 🎬 Supported Ad Formats
+
+### **📸 Image Ads (JPEG)**
+- Static banner ads, display ads, images
+- Automatically converted to high-quality JPEG
+- Optimized for digital displays
 - Supports all standard IAB ad sizes
-- Optimized for digital display screens
 
-### 🎥 **Video Ads (MP4)**
-- Video banner ads, video display ads
+### **🎥 Video Ads (MP4)**
+- Video banners, animated displays
 - Downloads original MP4 files when possible
-- Falls back to video screenshot if download fails
+- Falls back to video screenshots if needed
 - Perfect for dynamic digital signage
 
-## Getting Real Ad Units for Testing
+**File naming**: `ad_{unit_id}_{timestamp}.{jpg|mp4}`
 
-Since Google Ad Manager requires authentication, you'll need to create a free account:
+## 🔗 CMS Integration
 
-### Free Google Ad Manager Setup (5 minutes):
+### **Direct File Access**
+Your CMS can directly monitor the output folders:
 
-1. **Go to:** https://admanager.google.com
-2. **Sign in** with any Google account (free)
-3. **Create new network:**
-   - Network name: "Test Network" (or any name)
-   - Country: Your country
-   - Currency: Your currency
-4. **Create ad units:**
-   - Go to **Inventory** > **Ad units** > **New ad unit**
-   - Name: "Test Banner 320x50"
-   - Size: 320x50 (or any size you want)
-   - Click **Save**
-5. **Copy the ad unit path** (e.g., `/123456789/test_banner`)
-6. **Use this path** in our system
+```python
+import os
+import glob
 
-### Example Real Ad Unit Paths:
-After creating your Google Ad Manager account, you'll get paths like:
-- `/123456789/test_banner` - for banner ads
-- `/123456789/restaurant_display` - for restaurant displays  
-- `/123456789/retail_screens` - for retail screens
+def get_latest_ads():
+    """Get latest ad files for each unit"""
+    ads = {}
+    
+    for unit_folder in os.listdir('ads_output'):
+        unit_path = f'ads_output/{unit_folder}'
+        if os.path.isdir(unit_path):
+            # Get newest file
+            files = glob.glob(f'{unit_path}/*.(jpg|mp4)')
+            if files:
+                latest = max(files, key=os.path.getctime)
+                ads[unit_folder] = {
+                    'path': latest,
+                    'type': 'video' if latest.endswith('.mp4') else 'image',
+                    'timestamp': os.path.getctime(latest)
+                }
+    
+    return ads
 
-**Note:** Replace `123456789` with your actual network ID from Google Ad Manager.
+# Usage
+latest_ads = get_latest_ads()
+for unit, info in latest_ads.items():
+    print(f"{unit}: {info['type']} - {info['path']}")
+```
 
-### Global Configuration
+### **API Integration**
+Use REST endpoints for real-time integration:
 
-The `config.json` file contains global settings:
+```bash
+# Get all ad units with latest info
+curl http://localhost:5000/get_ad_units
 
-- `server_port`: Web interface port (default: 5000)
-- `headless`: Run browsers in headless mode (default: true)
-- `base_refresh_interval`: Default refresh interval in seconds
-- `base_output_folder`: Base directory for ad outputs
+# Get specific ad unit
+curl http://localhost:5000/get_ad_unit/{unit_id}
 
-### Ad Unit Configuration
+# Trigger manual refresh
+curl -X POST http://localhost:5000/refresh/{unit_id}
 
-Each ad unit can be configured with:
+# Refresh all ad units
+curl -X POST http://localhost:5000/refresh_all
+```
 
-- **Name**: Descriptive name for the ad unit
-- **Ad Unit Path**: Google Ad Manager ad unit path (e.g., `/6355419/Travel/Europe`)
-- **Size**: Ad dimensions in pixels [width, height]
-- **Refresh Interval**: How often to capture ads (in seconds)
-- **Output Folder**: Where to save captured ads
-- **Custom Targeting**: Key-value pairs for ad targeting
+## 🛠️ Management Commands
 
-### Custom Targeting Examples
+### **Docker Commands**
+```bash
+# Check status
+docker-compose ps
+
+# View logs (follow mode)
+docker-compose logs -f
+
+# Stop system
+docker-compose down
+
+# Start system
+docker-compose up -d
+
+# Restart with updates
+docker-compose up --build -d
+
+# Update from GitHub
+git pull
+docker-compose up --build -d
+```
+
+### **Direct File Access**
+```bash
+# View captured ads
+ls -la ads_output/*/
+
+# Monitor logs
+tail -f logs/ad_scraper.log
+
+# Check latest captures
+find ads_output -name "*.jpg" -o -name "*.mp4" | head -10
+
+# Watch for new files
+watch -n 5 "find ads_output -type f | wc -l"
+```
+
+## ⚙️ Configuration
+
+### **Global Settings**
+Edit via web interface or modify `config.json`:
 
 ```json
 {
-    "location": "warsaw",
-    "venue_type": "restaurant",
-    "audience": ["premium", "adult"],
-    "time_of_day": "evening"
+  "global_config": {
+    "server_port": 5000,
+    "headless": true,
+    "base_refresh_interval": 300,
+    "base_output_folder": "ads_output"
+  }
 }
 ```
 
-## Web Interface Usage
+### **Ad Unit Configuration**
+Each ad unit supports:
 
-### Adding Ad Units
+| Setting | Description | Example |
+|---------|-------------|---------|
+| **Name** | Friendly identifier | "Restaurant Main Display" |
+| **Ad Unit Path** | Google Ad Manager path | "/123456789/restaurant/main" |
+| **Size** | Dimensions in pixels | [1920, 1080] |
+| **Refresh Interval** | Capture frequency (seconds) | 300 |
+| **Output Folder** | Dedicated subfolder | "restaurant_main" |
+| **Custom Targeting** | Key-value targeting | {"location": "warsaw"} |
 
-1. Go to the "Ad Unity" tab
-2. Click "Dodaj nowy Ad Unit"
-3. Fill in the configuration
-4. Add custom targeting parameters as needed
-5. Save
+### **Custom Targeting Examples**
+```json
+{
+  "location": "warsaw",
+  "venue_type": "restaurant", 
+  "time_of_day": "dinner",
+  "audience": ["premium", "adult"],
+  "device": "digital_display",
+  "content_type": "promotional"
+}
+```
 
-### Managing Ad Units
+## 🔒 Production Deployment
 
-- **Refresh**: Manually trigger ad capture for a specific unit
-- **Edit**: Modify ad unit configuration
-- **Delete**: Remove an ad unit
-- **Refresh All**: Trigger manual refresh for all units
+### **Security Considerations**
+- Run in isolated Docker containers
+- Use internal networks when possible
+- Regular system updates
+- Monitor resource usage
+- Backup configurations
 
-### Monitoring
+### **Performance Optimization**
+- Adjust refresh intervals based on ad change frequency
+- Limit concurrent ad units to prevent resource exhaustion
+- Regular cleanup of old ad files
+- Monitor disk space usage
 
-The interface shows:
-- Last captured ad preview
-- Capture timestamps
-- Ad unit status
-- Configuration details
-
-## API Endpoints
-
-The system provides REST API endpoints:
-
-- `GET /` - Web interface
-- `POST /refresh/<unit_id>` - Manual refresh for specific unit
-- `POST /refresh_all` - Refresh all units
-- `GET /get_ad_units` - List all ad units
-- `POST /add_ad_unit` - Add new ad unit
-- `POST /update_ad_unit/<unit_id>` - Update ad unit
-- `POST /delete_ad_unit/<unit_id>` - Delete ad unit
-
-
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Browser fails to start**
-   - Ensure sufficient RAM (2GB+)
-   - Check Docker memory limits
-   - Verify Playwright installation
-
-2. **Ads not loading**
-   - Verify ad unit paths in Google Ad Manager
-   - Check custom targeting configuration
-   - Ensure internet connectivity
-
-3. **Permission errors**
-   - Check file/folder permissions
-   - Ensure output directories are writable
-
-### Logs
-
-View application logs:
-
+### **Scaling for Multiple Locations**
 ```bash
-# Docker
+# Location 1
+git clone https://github.com/Gman1988/MultiAdScraper.git location1
+cd location1 && docker-compose up -d
+
+# Location 2  
+git clone https://github.com/Gman1988/MultiAdScraper.git location2
+cd location2 && docker-compose up -d
+
+# Centralized monitoring
+# Each location runs on different ports or servers
+```
+
+## 🐛 Troubleshooting
+
+### **Common Issues**
+
+**❌ Docker not starting**
+```bash
+# Check Docker Desktop is running
+docker --version
+
+# Restart Docker Desktop
+# Check system resources (RAM/disk space)
+```
+
+**❌ Port 5000 already in use**
+```bash
+# Change port in docker-compose.yml
+ports:
+  - "5001:5000"  # Access via localhost:5001
+```
+
+**❌ Ads not loading**
+```bash
+# Check ad unit paths in Google Ad Manager
+# Verify custom targeting configuration
+# Check container logs: docker-compose logs -f
+```
+
+**❌ Permission errors**
+```bash
+# Ensure output directories are writable
+chmod 755 ads_output logs
+
+# Check Docker container permissions
+docker-compose logs multi-ad-scraper
+```
+
+### **Log Analysis**
+```bash
+# View recent logs
+docker-compose logs --tail=50 multi-ad-scraper
+
+# Follow logs in real-time
 docker-compose logs -f
 
-# Manual installation
-tail -f ad_scraper.log
+# Check specific ad unit activity
+grep "unit_name" logs/ad_scraper.log
 ```
 
-### Debug Mode
+## 📊 API Reference
 
-Run in debug mode (shows browser):
+### **Endpoints**
 
-1. Set `"headless": false` in config.json
-2. Restart the application
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | Web interface |
+| `GET` | `/get_ad_units` | List all ad units |
+| `GET` | `/get_ad_unit/{id}` | Get specific ad unit |
+| `POST` | `/add_ad_unit` | Add new ad unit |
+| `POST` | `/update_ad_unit/{id}` | Update ad unit |
+| `POST` | `/delete_ad_unit/{id}` | Delete ad unit |
+| `POST` | `/refresh/{id}` | Manual refresh ad unit |
+| `POST` | `/refresh_all` | Refresh all ad units |
+| `POST` | `/update_global_config` | Update global settings |
 
-## Performance Considerations
+### **Example API Usage**
+```python
+import requests
 
-### Resource Usage
+# Add new ad unit
+new_unit = {
+    "name": "Retail Display",
+    "ad_unit_path": "/123456789/retail",
+    "ad_unit_size": [1920, 1080],
+    "refresh_interval": 180,
+    "output_folder": "retail_display",
+    "custom_targeting": {
+        "location": "krakow",
+        "venue_type": "retail"
+    }
+}
 
-- **Memory**: ~500MB per browser instance
-- **CPU**: Moderate during ad capture
-- **Disk**: Depends on capture frequency and retention
-
-### Optimization Tips
-
-1. **Adjust refresh intervals** based on ad change frequency
-2. **Limit concurrent ad units** to prevent resource exhaustion
-3. **Regular cleanup** of old ad files
-4. **Monitor disk space** for output folders
-
-## Security Considerations
-
-- Run in isolated Docker container
-- Restrict network access if possible
-- Regular updates of dependencies
-- Monitor for unusual activity
-
-## Production Deployment
-
-### Recommended Setup
-
-```yaml
-# docker-compose.prod.yml
-version: '3.8'
-services:
-  multi-ad-scraper:
-    build: .
-    restart: always
-    mem_limit: 4g
-    cpus: 2.0
-    volumes:
-      - /data/ads:/app/ads_output
-      - /config/scraper.json:/app/config.json
-    environment:
-      - PYTHONUNBUFFERED=1
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+response = requests.post('http://localhost:5000/add_ad_unit', json=new_unit)
+print(response.json())
 ```
 
-### Monitoring
+## 🤝 Contributing
 
-Set up monitoring for:
-- Container health
-- Disk space usage
-- Ad capture success rates
-- Application logs
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-## Support
+## 📄 License
 
-For technical support:
-1. Check logs for error messages
-2. Verify configuration settings
-3. Test with minimal ad unit setup
-4. Contact system administrator
+This project is licensed under a Commercial License. Contact for licensing details.
 
-## License
+## 📞 Support
 
-Commercial license - contact for licensing details.
+- **Issues**: [GitHub Issues](https://github.com/Gman1988/MultiAdScraper/issues)
+- **Documentation**: This README
+- **Updates**: Watch this repository for updates
+
+## 🎯 Roadmap
+
+- [ ] Dashboard analytics and reporting
+- [ ] Multiple Google Ad Manager account support
+- [ ] Advanced scheduling (time-based targeting)
+- [ ] Cloud storage integration (AWS S3, Azure Blob)
+- [ ] RESTful webhook notifications
+- [ ] Mobile app for monitoring
+- [ ] Advanced image/video processing filters
+
+---
+
+**Made with ❤️ for digital signage professionals**
+
+⭐ **Star this repository if it helps your business!**
