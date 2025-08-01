@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiAdScraper - Panel sterowania</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        h1 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .ad-unit-card {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        .ad-unit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .ad-unit-tools {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.delete {
+            background-color: #f44336;
+        }
+        button.delete:hover {
+            background-color: #d32f2f;
+        }
+        button.edit {
+            background-color: #2196F3;
+        }
+        button.edit:hover {
+            background-color: #0b7dda;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-col {
+            flex: 1;
+        }
+        .ad-preview {
+            text-align: center;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .ad-preview img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #eee;
+        }
+        .success-message {
+            color: green;
+            margin-top: 10px;
+            padding: 5px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            padding: 5px;
+            background-color: #ffebee;
+            border-radius: 4px;
+        }
+        .last-ad-info {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 4px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            margin: 0;
+        }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+            padding: 10px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .targeting-pair {
+            position: relative;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .remove-targeting {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MultiAdScraper - System pobierania reklam z wielu Ad Unitów</h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="tab-ad-units">Ad Unity</div>
+            <div class="tab" data-tab="tab-global-config">Globalna konfiguracja</div>
+        </div>
+        
+        <div id="tab-ad-units" class="tab-content active">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Zarządzanie Ad Unitami</h2>
+                    <div>
+                        <button id="refresh-all-button">Odśwież wszystkie</button>
+                        <button id="add-ad-unit-button">Dodaj nowy Ad Unit</button>
+                    </div>
+                </div>
+                <div id="refresh-all-message"></div>
+                
+                <div id="ad-units-container">
+                    {% for unit in ad_units %}
+                    <div class="ad-unit-card" data-unit-id="{{ unit.id }}">
+                        <div class="ad-unit-header">
+                            <h3>{{ unit.name }}</h3>
+                            <div class="ad-unit-tools">
+                                <button class="refresh-button" data-unit-id="{{ unit.id }}">Odśwież</button>
+                                <button class="edit" data-unit-id="{{ unit.id }}">Edytuj</button>
+                                <button class="delete" data-unit-id="{{ unit.id }}">Usuń</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <p><strong>Ścieżka Ad Unit:</strong> {{ unit.ad_unit_path }}</p>
+                                <p><strong>Rozmiar:</strong> {{ unit.ad_unit_size[0] }}x{{ unit.ad_unit_size[1] }} px</p>
+                                <p><strong>Interwał odświeżania:</strong> {{ unit.refresh_interval }} sekund</p>
+                                <p><strong>Folder wyjściowy:</strong> {{ unit.output_folder }}</p>
+                                
+                                {% if unit.custom_targeting and unit.custom_targeting|length > 0 %}
+                                <div>
+                                    <strong>Custom Targeting:</strong>
+                                    <ul style="margin-top: 5px; padding-left: 20px;">
+                                        {% for key, value in unit.custom_targeting.items() %}
+                                        <li>{{ key }}: {{ value }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="last-ad-info" id="last-ad-info-{{ unit.id }}">
+                                    {% if unit.last_ad_info and unit.last_ad_info.timestamp %}
+                                        Ostatnia reklama: {{ unit.last_ad_info.filename }} ({{ unit.last_ad_info.timestamp }})
+                                        {% if unit.last_ad_info.ad_type %}
+                                            <br><small>Typ: {{ 'Wideo' if unit.last_ad_info.ad_type == 'video' else 'Obraz' }}</small>
+                                        {% endif %}
+                                    {% else %}
+                                        Nie przechwycono jeszcze żadnej reklamy.
+                                    {% endif %}
+                                </div>
+                                <div id="refresh-message-{{ unit.id }}"></div>
+                            </div>
+                            
+                            <div class="form-col">
+                                <div class="ad-preview" id="ad-preview-{{ unit.id }}">
+                                    {% if unit.last_ad_info and unit.last_ad_info.path %}
+                                        {% if unit.last_ad_info.filename.endswith('.mp4') %}
+                                            <video controls style="max-width: 100%; height: auto; border: 1px solid #eee;">
+                                                <source src="/ads_output/{{ unit.last_ad_info.filename }}" type="video/mp4">
+                                                Twoja przeglądarka nie obsługuje odtwarzania wideo.
+                                            </video>
+                                            <p><small>Wideo reklama</small></p>
+                                        {% else %}
+                                            <img src="/ads_output/{{ unit.last_ad_info.filename }}" alt="Ostatnia reklama">
+                                            <p><small>Reklama obrazkowa</small></p>
+                                        {% endif %}
+                                    {% else %}
+                                        <p>Brak dostępnego podglądu.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div id="tab-global-config" class="tab-content">
+            <div class="card">
+                <h2>Globalna konfiguracja</h2>
+                <form id="global-config-form">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label for="server_port">Port serwera:</label>
+                            <input type="number" id="server_port" name="server_port" value="{{ global_config.server_port }}">
+                        </div>
+                        
+                        <div class="form-col">
+                            <label for="headless">Tryb bezgłowy:</label>
+                            <select id="headless" name="headless">
+                                <option value="true" {% if global_config.headless %}selected{% endif %}>Tak</option>
+                                <option value="false" {% if not global_config.headless %}selected{% endif %}>Nie</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label for="base_refresh_interval">Domyślny interwał odświeżania (sekundy):</label>
+                            <input type="number" id="base_refresh_interval" name="base_refresh_interval" value="{{ global_config.base_refresh_interval }}">
+                        </div>
+                        
+                        <div class="form-col">
+                            <label for="base_output_folder">Bazowy folder wyjściowy:</label>
+                            <input type="text" id="base_output_folder" name="base_output_folder" value="{{ global_config.base_output_folder }}">
+                        </div>
+                    </div>
+                    
+                    <button type="submit">Zapisz konfigurację</button>
+                    <div id="global-config-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal do dodawania/edycji ad unitów -->
+    <div id="ad-unit-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Dodaj nowy Ad Unit</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="ad-unit-form">
+                <input type="hidden" id="unit_id" name="unit_id">
+                
+                <label for="name">Nazwa Ad Unit:</label>
+                <input type="text" id="name" name="name" required>
+                
+                <label for="ad_unit_path">Ścieżka Ad Unit:</label>
+                <input type="text" id="ad_unit_path" name="ad_unit_path" required>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="ad_unit_width">Szerokość (px):</label>
+                        <input type="number" id="ad_unit_width" name="ad_unit_width" required>
+                    </div>
+                    
+                    <div class="form-col">
+                        <label for="ad_unit_height">Wysokość (px):</label>
+                        <input type="number" id="ad_unit_height" name="ad_unit_height" required>
+                    </div>
+                </div>
+                
+                <label for="refresh_interval">Interwał odświeżania (sekundy):</label>
+                <input type="number" id="refresh_interval" name="refresh_interval" required>
+                
+                <label for="output_subfolder">Folder wyjściowy:</label>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span style="color: #666; font-style: italic;">{{ global_config.base_output_folder }}/</span>
+                    <input type="text" id="output_subfolder" name="output_subfolder" required style="flex: 1;" placeholder="np. restaurant_ads">
+                </div>
+                <small style="color: #666; font-style: italic;">Podaj tylko nazwę podfolderu. Pełna ścieżka zostanie utworzona automatycznie.</small>
+                <input type="hidden" id="output_folder" name="output_folder">
+                
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Custom Targeting</h3>
+                    <p>Dodaj pary key/value do targetowania reklam.</p>
+                    
+                    <div id="targeting-container">
+                        <!-- Tutaj będą dynamicznie dodawane pola key/value -->
+                    </div>
+                    
+                    <button type="button" id="add-targeting-button" style="background-color: #2196F3;">Dodaj parametr targetowania</button>
+                </div>
+                
+                <div style="margin-top: 20px; text-align: right;">
+                    <button type="button" id="cancel-button">Anuluj</button>
+                    <button type="submit" id="save-button">Zapisz</button>
+                </div>
+                <div id="modal-message"></div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Zmienna do przechowywania par targetujących
+        let targetingPairs = [];
+        
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                this.classList.add('active');
+                
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Refresh All button
+        document.getElementById('refresh-all-button').addEventListener('click', function() {
+            fetch('/refresh_all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById('refresh-all-message');
+                if (data.status === 'success') {
+                    messageDiv.className = 'success-message';
+                    messageDiv.textContent = data.message;
+                    setTimeout(() => {
+                        location.reload();
+                    }, 5000);
+                } else {
+                    messageDiv.className = 'error-message';
+                    messageDiv.textContent = data.message;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('refresh-all-message').className = 'error-message';
+                document.getElementById('refresh-all-message').textContent = 'Wystąpił błąd podczas odświeżania.';
+            });
+        });
+        
+        // Refresh button for each ad unit
+        document.querySelectorAll('.refresh-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const unitId = this.getAttribute('data-unit-id');
+                
+                fetch(`/refresh/${unitId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const messageDiv = document.getElementById(`refresh-message-${unitId}`);
+                    if (data.status === 'success') {
+                        messageDiv.className = 'success-message';
+                        messageDiv.textContent = data.message;
+                        setTimeout(() => {
+                            refreshAdUnitInfo(unitId);
+                        }, 5000);
+                    } else {
+                        messageDiv.className = 'error-message';
+                        messageDiv.textContent = data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById(`refresh-message-${unitId}`).className = 'error-message';
+                    document.getElementById(`refresh-message-${unitId}`).textContent = 'Wystąpił błąd podczas odświeżania.';
+                });
+            });
+        });
+        
+        // Global Config Form
+        document.getElementById('global-config-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                server_port: parseInt(document.getElementById('server_port').value),
+                headless: document.getElementById('headless').value === 'true',
+                base_refresh_interval: parseInt(document.getElementById('base_refresh_interval').value),
+                base_output_folder: document.getElementById('base_output_folder').value
+            };
+            
+            fetch('/update_global_config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById('global-config-message');
+                if (data.status === 'success') {
+                    messageDiv.className = 'success-message';
+                    messageDiv.textContent = data.message;
+                } else {
+                    messageDiv.className = 'error-message';
+                    messageDiv.textContent = data.message;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('global-config-message').className = 'error-message';
+                document.getElementById('global-config-message').textContent = 'Wystąpił błąd podczas zapisywania konfiguracji.';
+            });
+        });
+        
+        // Modal handling
+        const modal = document.getElementById('ad-unit-modal');
+        const closeBtn = document.querySelector('.close');
+        const cancelBtn = document.getElementById('cancel-button');
+        
+        // Funkcja do automatycznego konstruowania pełnej ścieżki output folder
+        function updateOutputFolder() {
+            const baseFolder = '{{ global_config.base_output_folder }}';
+            const subfolder = document.getElementById('output_subfolder').value;
+            
+            // Wyczyść subfolder z niepotrzebnych znaków
+            const cleanSubfolder = subfolder.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+            if (cleanSubfolder !== subfolder) {
+                document.getElementById('output_subfolder').value = cleanSubfolder;
+            }
+            
+            const fullPath = cleanSubfolder ? `${baseFolder}/${cleanSubfolder}` : baseFolder;
+            document.getElementById('output_folder').value = fullPath;
+        }
+        
+        // Nasłuchuj zmiany w polu subfolder
+        document.getElementById('output_subfolder').addEventListener('input', updateOutputFolder);
+        
+        // Funkcje obsługi custom targeting
+        function updateTargetingFields() {
+            const container = document.getElementById('targeting-container');
+            container.innerHTML = '';
+            
+            if (targetingPairs.length === 0) {
+                container.innerHTML = '<p>Brak zdefiniowanych parametrów targetowania.</p>';
+                return;
+            }
+            
+            targetingPairs.forEach((pair, index) => {
+                const pairDiv = document.createElement('div');
+                pairDiv.className = 'targeting-pair';
+                
+                pairDiv.innerHTML = `
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>Klucz:</label>
+                            <input type="text" value="${pair.key}" onchange="targetingPairs[${index}].key = this.value">
+                        </div>
+                        <div class="form-col">
+                            <label>Wartość:</label>
+                            <input type="text" value="${pair.value}" onchange="targetingPairs[${index}].value = this.value">
+                        </div>
+                    </div>
+                    <button type="button" class="delete remove-targeting" onclick="removeTargetingPair(${index})">Usuń</button>
+                `;
+                
+                container.appendChild(pairDiv);
+            });
+        }
+        
+        function removeTargetingPair(index) {
+            targetingPairs.splice(index, 1);
+            updateTargetingFields();
+        }
+        
+        document.getElementById('add-targeting-button').addEventListener('click', function() {
+            targetingPairs.push({ key: '', value: '' });
+            updateTargetingFields();
+        });
+        
+        // Open modal for adding new ad unit
+        document.getElementById('add-ad-unit-button').addEventListener('click', function() {
+            document.getElementById('modal-title').textContent = 'Dodaj nowy Ad Unit';
+            document.getElementById('unit_id').value = '';
+            document.getElementById('ad-unit-form').reset();
+            
+            document.getElementById('ad_unit_width').value = 300;
+            document.getElementById('ad_unit_height').value = 250;
+            document.getElementById('refresh_interval').value = {{ global_config.base_refresh_interval }};
+            document.getElementById('output_subfolder').value = 'new_unit';
+            updateOutputFolder();
+            
+            targetingPairs = [];
+            updateTargetingFields();
+            
+            modal.style.display = 'block';
+        });
+        
+        // Close the modal
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        cancelBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        });
+        
+        // Open modal for editing ad unit
+        document.querySelectorAll('button.edit').forEach(button => {
+            button.addEventListener('click', function() {
+                const unitId = this.getAttribute('data-unit-id');
+                
+                fetch(`/get_ad_unit/${unitId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('modal-title').textContent = 'Edytuj Ad Unit';
+                    document.getElementById('unit_id').value = data.id;
+                    document.getElementById('name').value = data.name;
+                    document.getElementById('ad_unit_path').value = data.ad_unit_path;
+                    document.getElementById('ad_unit_width').value = data.ad_unit_size[0];
+                    document.getElementById('ad_unit_height').value = data.ad_unit_size[1];
+                    document.getElementById('refresh_interval').value = data.refresh_interval;
+                    
+                    // Wyciągnij subfolder z pełnej ścieżki
+                    const baseFolder = '{{ global_config.base_output_folder }}';
+                    const fullPath = data.output_folder;
+                    const subfolder = fullPath.startsWith(baseFolder + '/') ? 
+                        fullPath.substring(baseFolder.length + 1) : fullPath;
+                    document.getElementById('output_subfolder').value = subfolder;
+                    updateOutputFolder();
+                    
+                    targetingPairs = [];
+                    if (data.custom_targeting) {
+                        for (const [key, value] of Object.entries(data.custom_targeting)) {
+                            targetingPairs.push({ key: key, value: value });
+                        }
+                    }
+                    updateTargetingFields();
+                    
+                    modal.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Nie udało się pobrać danych ad unitu.');
+                });
+            });
+        });
+        
+        // Save ad unit form
+        document.getElementById('ad-unit-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const unitId = document.getElementById('unit_id').value;
+            
+            const customTargeting = {};
+            targetingPairs.forEach(pair => {
+                if (pair.key.trim() !== '' && pair.value.trim() !== '') {
+                    customTargeting[pair.key.trim()] = pair.value.trim();
+                }
+            });
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                ad_unit_path: document.getElementById('ad_unit_path').value,
+                ad_unit_size: [
+                    parseInt(document.getElementById('ad_unit_width').value),
+                    parseInt(document.getElementById('ad_unit_height').value)
+                ],
+                refresh_interval: parseInt(document.getElementById('refresh_interval').value),
+                output_folder: document.getElementById('output_folder').value,
+                custom_targeting: customTargeting
+            };
+            
+            let url, method;
+            if (unitId) {
+                url = `/update_ad_unit/${unitId}`;
+                method = 'POST';
+            } else {
+                url = '/add_ad_unit';
+                method = 'POST';
+            }
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    modal.style.display = 'none';
+                    location.reload();
+                } else {
+                    const messageDiv = document.getElementById('modal-message');
+                    messageDiv.className = 'error-message';
+                    messageDiv.textContent = data.message;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('modal-message').className = 'error-message';
+                document.getElementById('modal-message').textContent = 'Wystąpił błąd podczas zapisywania.';
+            });
+        });
+        
+        // Delete ad unit
+        document.querySelectorAll('button.delete').forEach(button => {
+            button.addEventListener('click', function() {
+                if (confirm('Czy na pewno chcesz usunąć ten Ad Unit?')) {
+                    const unitId = this.getAttribute('data-unit-id');
+                    
+                    fetch(`/delete_ad_unit/${unitId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Wystąpił błąd podczas usuwania ad unitu.');
+                    });
+                }
+            });
+        });
+        
+        // Function to refresh ad unit info
+        function refreshAdUnitInfo(unitId) {
+            fetch(`/get_ad_unit/${unitId}`)
+            .then(response => response.json())
+            .then(data => {
+                const infoDiv = document.getElementById(`last-ad-info-${unitId}`);
+                const previewDiv = document.getElementById(`ad-preview-${unitId}`);
+                
+                if (data.last_ad_info && data.last_ad_info.timestamp) {
+                    let adTypeText = '';
+                    if (data.last_ad_info.ad_type) {
+                        adTypeText = `<br><small>Typ: ${data.last_ad_info.ad_type === 'video' ? 'Wideo' : 'Obraz'}</small>`;
+                    }
+                    infoDiv.innerHTML = `Ostatnia reklama: ${data.last_ad_info.filename} (${data.last_ad_info.timestamp})${adTypeText}`;
+                    
+                    // Update preview based on file type
+                    if (data.last_ad_info.filename.endsWith('.mp4')) {
+                        previewDiv.innerHTML = `
+                            <video controls style="max-width: 100%; height: auto; border: 1px solid #eee;">
+                                <source src="/ads_output/${data.last_ad_info.filename}" type="video/mp4">
+                                Twoja przeglądarka nie obsługuje odtwarzania wideo.
+                            </video>
+                            <p><small>Wideo reklama</small></p>
+                        `;
+                    } else {
+                        previewDiv.innerHTML = `
+                            <img src="/ads_output/${data.last_ad_info.filename}" alt="Ostatnia reklama">
+                            <p><small>Reklama obrazkowa</small></p>
+                        `;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        // Refresh ad unit info periodically
+        setInterval(function() {
+            document.querySelectorAll('.ad-unit-card').forEach(card => {
+                const unitId = card.getAttribute('data-unit-id');
+                refreshAdUnitInfo(unitId);
+            });
+        }, 10000);
+    </script>
+</body>
+</html>

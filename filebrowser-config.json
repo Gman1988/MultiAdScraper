@@ -1,0 +1,26 @@
+{
+  "port": 80,
+  "baseURL": "",
+  "address": "0.0.0.0",
+  "log": "stdout",
+  "database": "/database.db",
+  "root": "/srv",
+  "auth": {
+    "method": "json"
+  },
+  "branding": {
+    "name": "MultiAdScraper Files",
+    "disableExternal": true
+  },
+  "commands": [],
+  "shell": [],
+  "rules": [
+    {
+      "allow": true,
+      "regex": true,
+      "raw": "\\.(jpg|jpeg|mp4|png|log|txt|json)$"
+    }
+  ],
+  "signup": false,
+  "createUserDir": false
+}

@@ -6,6 +6,7 @@ A comprehensive system for capturing ads from Google Ad Manager and distributing
 
 - Multiple Ad Unit support with individual configurations
 - Custom targeting parameters for precise ad selection
+- **Dual format support**: JPEG images and MP4 videos
 - Automated ad capture at configurable intervals
 - Manual refresh capabilities
 - Web-based administration interface
@@ -86,7 +87,49 @@ mkdir -p logs
 python multi_ad_scraper.py
 ```
 
-## Configuration
+## Supported Ad Formats
+
+The system automatically detects and handles two types of ads:
+
+### 📸 **Image Ads (JPEG)**
+- Banner ads, display ads, static images
+- Automatically converted to high-quality JPEG format
+- Supports all standard IAB ad sizes
+- Optimized for digital display screens
+
+### 🎥 **Video Ads (MP4)**
+- Video banner ads, video display ads
+- Downloads original MP4 files when possible
+- Falls back to video screenshot if download fails
+- Perfect for dynamic digital signage
+
+## Getting Real Ad Units for Testing
+
+Since Google Ad Manager requires authentication, you'll need to create a free account:
+
+### Free Google Ad Manager Setup (5 minutes):
+
+1. **Go to:** https://admanager.google.com
+2. **Sign in** with any Google account (free)
+3. **Create new network:**
+   - Network name: "Test Network" (or any name)
+   - Country: Your country
+   - Currency: Your currency
+4. **Create ad units:**
+   - Go to **Inventory** > **Ad units** > **New ad unit**
+   - Name: "Test Banner 320x50"
+   - Size: 320x50 (or any size you want)
+   - Click **Save**
+5. **Copy the ad unit path** (e.g., `/123456789/test_banner`)
+6. **Use this path** in our system
+
+### Example Real Ad Unit Paths:
+After creating your Google Ad Manager account, you'll get paths like:
+- `/123456789/test_banner` - for banner ads
+- `/123456789/restaurant_display` - for restaurant displays  
+- `/123456789/retail_screens` - for retail screens
+
+**Note:** Replace `123456789` with your actual network ID from Google Ad Manager.
 
 ### Global Configuration
 
@@ -156,35 +199,7 @@ The system provides REST API endpoints:
 - `POST /update_ad_unit/<unit_id>` - Update ad unit
 - `POST /delete_ad_unit/<unit_id>` - Delete ad unit
 
-## Integration with CMS
 
-### Output Structure
-
-Captured ads are saved in the configured output folders:
-
-```
-ads_output/
-├── restaurant_ads/
-│   ├── ad_unit-1_20241220_143022.png
-│   └── ad_unit-1_20241220_143322.png
-└── retail_ads/
-    ├── ad_unit-2_20241220_143025.png
-    └── ad_unit-2_20241220_143325.png
-```
-
-### File Naming Convention
-
-Files are named: `ad_{unit_id}_{timestamp}.png`
-
-- `unit_id`: Unique identifier for the ad unit
-- `timestamp`: YYYYMMDD_HHMMSS format
-
-### CMS Integration
-
-Your CMS can:
-1. Monitor output folders for new files
-2. Use the `/get_ad_units` API to get latest ad info
-3. Process and distribute images to digital displays
 
 ## Troubleshooting
 

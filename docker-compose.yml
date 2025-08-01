@@ -22,6 +22,20 @@ services:
     mem_limit: 2g
     cpus: 1.0
 
+  # FileBrowser - CORRECT SYNTAX, NO LOGIN
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: ad_filebrowser
+    ports:
+      - "8080:80"
+    volumes:
+      - ./ads_output:/srv/ads_output
+      - ./logs:/srv/logs
+    command: ["--noauth", "--root=/srv", "--port=80", "--address=0.0.0.0"]
+    restart: unless-stopped
+    depends_on:
+      - multi-ad-scraper
+
 volumes:
   ads_output:
   logs:

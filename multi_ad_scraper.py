@@ -212,7 +212,7 @@ class MultiAdScraper:
         return html
     
     def capture_ad(self, ad_unit):
-        """Przechwytuje reklamę dla konkretnego ad unitu"""
+        """Przechwytuje reklamę dla konkretnego ad unitu (obsługuje obrazy i wideo)"""
         unit_id = ad_unit["id"]
         logger.info(f"Przechwytywanie reklamy dla ad unitu: {ad_unit['name']} (ID: {unit_id})")
         
@@ -231,31 +231,177 @@ class MultiAdScraper:
                 except Exception as e:
                     logger.warning(f"Timeout przy oczekiwaniu na reklamę dla {ad_unit['name']}: {e}")
                 
-                time.sleep(2)
+                time.sleep(3)  # Dodatkowy czas na załadowanie wideo
                 
-                ad_container = page.locator('#ad-container')
+                # Sprawdź czy reklama zawiera wideo
+                ad_type, captured_file = self.detect_and_capture_ad_content(page, ad_unit)
                 
-                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"ad_{unit_id}_{timestamp}.png"
-                filepath = os.path.join(ad_unit["output_folder"], filename)
-                
-                ad_container.screenshot(path=filepath)
-                logger.info(f"Zapisano reklamę dla {ad_unit['name']} do pliku: {filepath}")
-                
-                ad_unit["last_ad_info"] = {
-                    "timestamp": timestamp,
-                    "filename": filename,
-                    "path": filepath
-                }
-                
-                self.save_config()
+                if captured_file:
+                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                    
+                    ad_unit["last_ad_info"] = {
+                        "timestamp": timestamp,
+                        "filename": os.path.basename(captured_file),
+                        "path": captured_file,
+                        "ad_type": ad_type
+                    }
+                    
+                    self.save_config()
+                    logger.info(f"Zapisano reklamę {ad_type} dla {ad_unit['name']}: {captured_file}")
+                else:
+                    logger.warning(f"Nie udało się przechwycić reklamy dla {ad_unit['name']}")
                 
                 browser.close()
-                return filepath
+                return captured_file
                 
             except Exception as e:
                 logger.error(f"Błąd podczas przechwytywania reklamy dla {ad_unit['name']}: {e}")
                 return None
+    
+    def detect_and_capture_ad_content(self, page, ad_unit):
+        """Wykrywa typ reklamy (obraz/wideo) i przechwytuje odpowiedni format"""
+        try:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            unit_id = ad_unit["id"]
+            
+            # Sprawdź czy w kontenerze reklamy jest element video
+            video_elements = page.locator('#ad-container video').count()
+            
+            if video_elements > 0:
+                return self.capture_video_ad(page, ad_unit, unit_id, timestamp)
+            else:
+                return self.capture_image_ad(page, ad_unit, unit_id, timestamp)
+                
+        except Exception as e:
+            logger.error(f"Błąd podczas wykrywania typu reklamy: {e}")
+            return "unknown", None
+    
+    def capture_video_ad(self, page, ad_unit, unit_id, timestamp):
+        """Przechwytuje reklamę wideo i zapisuje jako MP4"""
+        try:
+            # Sprawdź różne możliwe źródła wideo
+            video_selectors = [
+                '#ad-container video source',
+                '#ad-container video',
+                '#ad-container iframe video',
+                'video'
+            ]
+            
+            video_src = None
+            for selector in video_selectors:
+                try:
+                    elements = page.locator(selector)
+                    if elements.count() > 0:
+                        src = elements.first.get_attribute('src')
+                        if src and (src.startswith('http') or src.startswith('blob:')):
+                            video_src = src
+                            break
+                except:
+                    continue
+            
+            if video_src and not video_src.startswith('blob:'):
+                # Pobierz wideo za pomocą requests
+                import requests
+                filename = f"ad_{unit_id}_{timestamp}.mp4"
+                filepath = os.path.join(ad_unit["output_folder"], filename)
+                
+                try:
+                    response = requests.get(video_src, stream=True, timeout=30)
+                    response.raise_for_status()
+                    
+                    with open(filepath, 'wb') as f:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                    
+                    logger.info(f"Pobrano wideo reklamę: {filepath}")
+                    return "video", filepath
+                    
+                except requests.RequestException as e:
+                    logger.warning(f"Błąd podczas pobierania wideo przez requests: {e}")
+                    
+            # Jeśli nie można pobrać wideo, zrób screenshot
+            logger.info("Nie można pobrać pliku wideo, robię screenshot elementu wideo")
+            return self.capture_video_screenshot(page, ad_unit, unit_id, timestamp)
+                
+        except Exception as e:
+            logger.warning(f"Błąd podczas pobierania wideo: {e}, robię screenshot")
+            return self.capture_video_screenshot(page, ad_unit, unit_id, timestamp)
+    
+    def capture_video_screenshot(self, page, ad_unit, unit_id, timestamp):
+        """Robi screenshot elementu wideo jako fallback"""
+        try:
+            # Spróbuj zrobić screenshot konkretnego elementu video
+            video_element = page.locator('#ad-container video').first
+            if video_element.count() > 0:
+                filename = f"ad_{unit_id}_{timestamp}_video_screenshot.jpg"
+                filepath = os.path.join(ad_unit["output_folder"], filename)
+                
+                # Screenshot elementu video
+                temp_png = f"temp_video_{unit_id}_{timestamp}.png"
+                temp_png_path = os.path.join(ad_unit["output_folder"], temp_png)
+                video_element.screenshot(path=temp_png_path)
+                
+                # Konwertuj do JPEG
+                from PIL import Image
+                with Image.open(temp_png_path) as img:
+                    if img.mode in ('RGBA', 'LA', 'P'):
+                        background = Image.new('RGB', img.size, (255, 255, 255))
+                        if img.mode == 'P':
+                            img = img.convert('RGBA')
+                        background.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+                        img = background
+                    
+                    img.save(filepath, 'JPEG', quality=95, optimize=True)
+                
+                os.remove(temp_png_path)
+                logger.info(f"Zapisano screenshot wideo jako obraz: {filepath}")
+                return "video_screenshot", filepath
+            else:
+                # Fallback do screenshot całego kontenera
+                return self.capture_image_ad(page, ad_unit, unit_id, timestamp)
+                
+        except Exception as e:
+            logger.error(f"Błąd podczas robienia screenshot wideo: {e}")
+            return self.capture_image_ad(page, ad_unit, unit_id, timestamp)
+    
+    def capture_image_ad(self, page, ad_unit, unit_id, timestamp):
+        """Przechwytuje reklamę obrazkową i zapisuje jako JPEG"""
+        try:
+            ad_container = page.locator('#ad-container')
+            
+            # Zapisz jako PNG najpierw (dla jakości)
+            temp_png = f"temp_{unit_id}_{timestamp}.png"
+            temp_png_path = os.path.join(ad_unit["output_folder"], temp_png)
+            ad_container.screenshot(path=temp_png_path)
+            
+            # Konwertuj do JPEG
+            filename = f"ad_{unit_id}_{timestamp}.jpg"
+            filepath = os.path.join(ad_unit["output_folder"], filename)
+            
+            # Użyj PIL do konwersji PNG -> JPEG
+            from PIL import Image
+            with Image.open(temp_png_path) as img:
+                # Konwertuj do RGB (JPEG nie obsługuje przezroczystości)
+                if img.mode in ('RGBA', 'LA', 'P'):
+                    # Utwórz białe tło
+                    background = Image.new('RGB', img.size, (255, 255, 255))
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
+                    background.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+                    img = background
+                
+                # Zapisz jako JPEG z wysoką jakością
+                img.save(filepath, 'JPEG', quality=95, optimize=True)
+            
+            # Usuń tymczasowy plik PNG
+            os.remove(temp_png_path)
+            
+            logger.info(f"Zapisano obraz reklamy: {filepath}")
+            return "image", filepath
+            
+        except Exception as e:
+            logger.error(f"Błąd podczas zapisywania obrazu reklamy: {e}")
+            return "image", None
     
     def ad_refresh_loop(self, ad_unit):
         """Pętla odświeżania reklam dla pojedynczego ad unitu"""
